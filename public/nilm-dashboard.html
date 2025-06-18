@@ -1,0 +1,618 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NILM Energy Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .energy-icon { background: linear-gradient(45deg, #fbbf24, #f59e0b); }
+        .appliance-icon { background: linear-gradient(45deg, #10b981, #059669); }
+        .cost-icon { background: linear-gradient(45deg, #ef4444, #dc2626); }
+        .efficiency-icon { background: linear-gradient(45deg, #8b5cf6, #7c3aed); }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .metric-unit {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-left: 5px;
+        }
+
+        .trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .trend-up { color: #ef4444; }
+        .trend-down { color: #10b981; }
+
+        .appliance-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .appliance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .appliance-item:hover {
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .appliance-item.active {
+            border-left-color: #10b981;
+        }
+
+        .appliance-item.standby {
+            border-left-color: #fbbf24;
+        }
+
+        .appliance-item.off {
+            border-left-color: #64748b;
+        }
+
+        .appliance-name {
+            font-weight: 500;
+        }
+
+        .appliance-power {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-active { background: #10b981; }
+        .status-standby { background: #fbbf24; }
+        .status-off { background: #64748b; }
+
+        .chart-container {
+            height: 200px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .chart {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .recommendations {
+            grid-column: 1 / -1;
+        }
+
+        .recommendation-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .recommendation-icon {
+            width: 30px;
+            height: 30px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .recommendation-text {
+            flex: 1;
+        }
+
+        .recommendation-savings {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-button {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .alert {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-icon {
+            margin-right: 10px;
+            color: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .metric-value {
+                font-size: 1.8rem;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>⚡ NILM Energy Monitor</h1>
+            <p>Non-Intrusive Load Monitoring & Recommendations</p>
+        </header>
+
+        <div class="alert" id="alertPanel" style="display: none;">
+            <span class="alert-icon">⚠️</span>
+            <span id="alertText"></span>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Total Energy Consumption -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon energy-icon">⚡</div>
+                    <div class="card-title">Current Power</div>
+                </div>
+                <div class="metric-value" id="currentPower">2.4<span class="metric-unit">kW</span></div>
+                <div class="trend trend-up">
+                    ↗️ <span id="powerTrend">+12% from yesterday</span>
+                </div>
+                <div class="chart-container">
+                    <div class="chart">
+                        <div class="chart-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Energy -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon efficiency-icon">📊</div>
+                    <div class="card-title">Today's Usage</div>
+                </div>
+                <div class="metric-value" id="dailyUsage">18.7<span class="metric-unit">kWh</span></div>
+                <div class="trend trend-down">
+                    ↘️ <span id="dailyTrend">-5% vs average</span>
+                </div>
+            </div>
+
+            <!-- Cost Tracker -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon cost-icon">💰</div>
+                    <div class="card-title">Today's Cost</div>
+                </div>
+                <div class="metric-value" id="dailyCost">$2.81</div>
+                <div class="trend trend-down">
+                    ↘️ <span id="costTrend">$0.15 saved</span>
+                </div>
+            </div>
+
+            <!-- Efficiency Score -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon appliance-icon">🎯</div>
+                    <div class="card-title">Efficiency Score</div>
+                </div>
+                <div class="metric-value" id="efficiencyScore">87<span class="metric-unit">%</span></div>
+                <div class="trend trend-up">
+                    ↗️ <span id="efficiencyTrend">+3% this week</span>
+                </div>
+            </div>
+
+            <!-- Detected Appliances -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon appliance-icon">🏠</div>
+                    <div class="card-title">Detected Appliances</div>
+                </div>
+                <div class="appliance-list" id="applianceList">
+                    <!-- Appliances will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Peak Hours -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon energy-icon">⏰</div>
+                    <div class="card-title">Peak Hours</div>
+                </div>
+                <div class="metric-value" id="peakTime">7-9 PM</div>
+                <div style="color: #94a3b8; margin-top: 10px;">
+                    <div>Peak Usage: <span id="peakUsage">3.2 kW</span></div>
+                    <div>Off-Peak: <span id="offPeakUsage">1.1 kW</span></div>
+                </div>
+            </div>
+
+            <!-- Smart Recommendations -->
+            <div class="card recommendations">
+                <div class="card-header">
+                    <div class="card-icon appliance-icon">💡</div>
+                    <div class="card-title">Smart Recommendations</div>
+                </div>
+                <div id="recommendationsList">
+                    <!-- Recommendations will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <button class="control-button" onclick="refreshData()">
+                <span id="refreshText">🔄 Refresh Data</span>
+            </button>
+            <button class="control-button" onclick="toggleMode()">
+                🌙 Night Mode
+            </button>
+            <button class="control-button" onclick="exportData()">
+                📊 Export Report
+            </button>
+            <button class="control-button" onclick="scheduleOptimization()">
+                ⚙️ Auto Optimize
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for appliances
+        const appliances = [
+            { name: 'Air Conditioner', power: 1200, status: 'active', icon: '❄️' },
+            { name: 'Refrigerator', power: 150, status: 'active', icon: '🧊' },
+            { name: 'Washing Machine', power: 0, status: 'off', icon: '🧺' },
+            { name: 'Water Heater', power: 800, status: 'active', icon: '🚿' },
+            { name: 'Television', power: 65, status: 'standby', icon: '📺' },
+            { name: 'Dishwasher', power: 0, status: 'off', icon: '🍽️' },
+            { name: 'Microwave', power: 0, status: 'off', icon: '🔥' },
+            { name: 'LED Lights', power: 45, status: 'active', icon: '💡' }
+        ];
+
+        // Sample recommendations
+        const recommendations = [
+            { 
+                text: 'Run dishwasher during off-peak hours (11 PM - 6 AM)', 
+                savings: 'Save $0.85/day',
+                icon: '⏰'
+            },
+            { 
+                text: 'Reduce AC temperature by 2°F when away', 
+                savings: 'Save $1.20/day',
+                icon: '🌡️'
+            },
+            { 
+                text: 'Unplug TV when not in use (currently in standby)', 
+                savings: 'Save $0.15/day',
+                icon: '🔌'
+            },
+            { 
+                text: 'Use cold water for washing clothes', 
+                savings: 'Save $0.45/day',
+                icon: '❄️'
+            }
+        ];
+
+        // Initialize the dashboard
+        function initializeDashboard() {
+            populateAppliances();
+            populateRecommendations();
+            updateMetrics();
+            startRealTimeUpdates();
+        }
+
+        // Populate appliances list
+        function populateAppliances() {
+            const applianceList = document.getElementById('applianceList');
+            applianceList.innerHTML = '';
+
+            appliances.forEach(appliance => {
+                const item = document.createElement('div');
+                item.className = `appliance-item ${appliance.status}`;
+                
+                item.innerHTML = `
+                    <div>
+                        <div class="appliance-name">${appliance.icon} ${appliance.name}</div>
+                        <div class="appliance-power">${appliance.power}W</div>
+                    </div>
+                    <div class="status-indicator status-${appliance.status}"></div>
+                `;
+                
+                applianceList.appendChild(item);
+            });
+        }
+
+        // Populate recommendations
+        function populateRecommendations() {
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
+
+            recommendations.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                
+                item.innerHTML = `
+                    <div class="recommendation-icon">${rec.icon}</div>
+                    <div class="recommendation-text">
+                        <div>${rec.text}</div>
+                        <div class="recommendation-savings">${rec.savings}</div>
+                    </div>
+                `;
+                
+                recommendationsList.appendChild(item);
+            });
+        }
+
+        // Update metrics with simulated real-time data
+        function updateMetrics() {
+            const currentPower = document.getElementById('currentPower');
+            const newPower = (Math.random() * 2 + 1.5).toFixed(1);
+            currentPower.innerHTML = `${newPower}<span class="metric-unit">kW</span>`;
+
+            // Update efficiency score
+            const efficiencyScore = document.getElementById('efficiencyScore');
+            const newScore = Math.floor(Math.random() * 10 + 80);
+            efficiencyScore.innerHTML = `${newScore}<span class="metric-unit">%</span>`;
+
+            // Simulate appliance power changes
+            appliances.forEach(appliance => {
+                if (appliance.status === 'active') {
+                    appliance.power += Math.floor(Math.random() * 20 - 10);
+                    appliance.power = Math.max(0, appliance.power);
+                }
+            });
+
+            populateAppliances();
+            checkAlerts();
+        }
+
+        // Check for alerts
+        function checkAlerts() {
+            const totalPower = appliances.reduce((sum, app) => sum + app.power, 0);
+            const alertPanel = document.getElementById('alertPanel');
+            const alertText = document.getElementById('alertText');
+
+            if (totalPower > 3000) {
+                alertPanel.style.display = 'flex';
+                alertText.textContent = `High power consumption detected: ${(totalPower/1000).toFixed(1)}kW`;
+            } else {
+                alertPanel.style.display = 'none';
+            }
+        }
+
+        // Start real-time updates
+        function startRealTimeUpdates() {
+            setInterval(updateMetrics, 5000); // Update every 5 seconds
+        }
+
+        // Control panel functions
+        function refreshData() {
+            const refreshText = document.getElementById('refreshText');
+            refreshText.innerHTML = '<span class="loading"></span> Refreshing...';
+            
+            setTimeout(() => {
+                refreshText.innerHTML = '🔄 Refresh Data';
+                updateMetrics();
+            }, 2000);
+        }
+
+        function toggleMode() {
+            document.body.style.filter = document.body.style.filter === 'invert(1) hue-rotate(180deg)' 
+                ? 'none' 
+                : 'invert(1) hue-rotate(180deg)';
+        }
+
+        function exportData() {
+            alert('📊 Energy report exported to Downloads folder!');
+        }
+
+        function scheduleOptimization() {
+            alert('⚙️ Auto-optimization scheduled for off-peak hours!');
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // Add touch support for mobile
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            // Pull to refresh
+            if (diff < -100 && window.scrollY === 0) {
+                refreshData();
+            }
+        });
+    </script>
+</body>
+</html>
