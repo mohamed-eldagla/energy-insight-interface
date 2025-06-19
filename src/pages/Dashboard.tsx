@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Zap, TrendingUp, TrendingDown, Home, Clock, DollarSign } from 'lucide-react';
+import { AlertCircle, Zap, TrendingUp, TrendingDown, Home, Clock, DollarSign, LogOut, User } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useAuth } from '@/contexts/AuthContext';
+import Chatbot from '@/components/Chatbot';
 
 interface ApplianceData {
   id: string;
@@ -29,6 +30,8 @@ const Dashboard = () => {
   const [selectedAppliance, setSelectedAppliance] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<string[]>([]);
+  
+  const { user, signOut } = useAuth();
 
   const appliances = ['refrigerator', 'washer_dryer', 'microwave', 'dish_washer'];
   const houses = ['1', '2', '3', '4', '5', '6'];
@@ -125,11 +128,29 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent mb-2">
-            ⚡ NILM Energy Dashboard
-          </h1>
-          <p className="text-slate-300 text-lg">Non-Intrusive Load Monitoring & Optimization</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+              ⚡ NILM Energy Dashboard
+            </h1>
+            <p className="text-slate-300 text-lg">Non-Intrusive Load Monitoring & Optimization</p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-300">
+              <User className="w-4 h-4" />
+              <span className="text-sm">{user?.email}</span>
+            </div>
+            <Button
+              onClick={signOut}
+              variant="outline"
+              size="sm"
+              className="border-slate-600 text-slate-300 hover:bg-slate-800"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Controls */}
@@ -326,6 +347,9 @@ const Dashboard = () => {
           </>
         )}
       </div>
+      
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 };

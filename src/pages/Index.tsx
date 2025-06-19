@@ -17,8 +17,13 @@ const Index = () => {
               <span className="text-xl font-bold">NILM Dashboard</span>
             </div>
             <div className="flex space-x-4">
-              <Link to="/dashboard">
+              <Link to="/auth">
                 <Button variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/dashboard">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   Open Dashboard
                 </Button>
               </Link>
@@ -42,10 +47,10 @@ const Index = () => {
             patterns and provides intelligent recommendations to optimize efficiency and reduce costs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/dashboard">
+            <Link to="/auth">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
                 <BarChart3 className="w-5 h-5 mr-2" />
-                View Dashboard
+                Get Started
               </Button>
             </Link>
             <Button size="lg" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-3 text-lg">
