@@ -193,16 +193,4 @@ The application expects data in the following format:
 - **Environment Variables**: API keys stored securely
 - **Client-side Only**: No sensitive server-side logic exposed
 
-## 📞 Support
 
-- **Lovable Community**: [Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
-- **Documentation**: [Lovable Docs](https://docs.lovable.dev/)
-- **Video Tutorials**: [YouTube Playlist](https://www.youtube.com/watch?v=9KHLTZaJcR8&list=PLbVHz4urQBZkJiAWdG8HWoJTdgEysigIO)
-
-## 📄 License
-
-This project is built with Lovable and can be freely modified and deployed according to your needs.
-
----
-
-**Built with ❤️ using [Lovable](https://lovable.dev) - The AI-powered web application builder**
