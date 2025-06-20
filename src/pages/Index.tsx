@@ -53,7 +53,12 @@ const Index = () => {
                 Get Started
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-3 text-lg">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-3 text-lg"
+              onClick={() => document.getElementById('project-info')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               <Settings className="w-5 h-5 mr-2" />
               Learn More
             </Button>
@@ -139,6 +144,44 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Project Information Section */}
+      <section id="project-info" className="py-20 px-4 bg-slate-900/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <img 
+              src="/lovable-uploads/52b51bd3-4a35-4c6e-8736-8297b8003642.png" 
+              alt="E-JUST Logo" 
+              className="h-20 mx-auto mb-8"
+            />
+            <h2 className="text-3xl font-bold text-white mb-6">About This Project</h2>
+            <div className="max-w-4xl mx-auto text-left bg-slate-800/50 rounded-lg p-8 border border-slate-700">
+              <p className="text-slate-300 mb-6">
+                This is a part of the graduation project titled <span className="text-blue-400 font-semibold">"IoT-Based System Architecture for Real-Time Power Quality Monitoring and Data Analysis"</span> for the faculty of Computer Science and Information Technology.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-white font-semibold mb-2">Academic Details</h3>
+                  <p className="text-slate-300 mb-2"><strong>Major:</strong> AI and Data Science</p>
+                  <p className="text-slate-300 mb-2"><strong>Class:</strong> 2025</p>
+                  <p className="text-slate-300"><strong>Supervised by:</strong> Prof. Tamer Megahed</p>
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold mb-2">Student Team</h3>
+                  <ul className="text-slate-300 space-y-1">
+                    <li>• Mohamed Eldagla</li>
+                    <li>• Kenzy Mohamed</li>
+                    <li>• Hazem Mohamed</li>
+                    <li>• Seif Diaa</li>
+                    <li>• Hagar Ali</li>
+                    <li>• Mohamed Mostafa</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
