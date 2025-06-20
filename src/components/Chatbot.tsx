@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Send, Bot, User, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -167,55 +168,57 @@ const Chatbot = () => {
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col p-3">
-        <div className="flex-1 overflow-y-auto space-y-3 mb-3">
-          {messages.length === 0 && (
-            <div className="text-slate-400 text-sm text-center py-4">
-              Ask me anything about energy efficiency and your NILM dashboard!
-            </div>
-          )}
-          
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex gap-2 ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-            >
-              {!msg.isUser && (
+        <ScrollArea className="flex-1 mb-3">
+          <div className="space-y-3 pr-4">
+            {messages.length === 0 && (
+              <div className="text-slate-400 text-sm text-center py-4">
+                Ask me anything about energy efficiency and your NILM dashboard!
+              </div>
+            )}
+            
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex gap-2 ${msg.isUser ? 'justify-end' : 'justify-start'}`}
+              >
+                {!msg.isUser && (
+                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="w-3 h-3 text-white" />
+                  </div>
+                )}
+                
+                <div
+                  className={`max-w-[70%] p-2 rounded-lg text-sm ${
+                    msg.isUser
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-700 text-slate-200'
+                  }`}
+                >
+                  {msg.message}
+                </div>
+                
+                {msg.isUser && (
+                  <div className="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {loading && (
+              <div className="flex gap-2 justify-start">
                 <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
                   <Bot className="w-3 h-3 text-white" />
                 </div>
-              )}
-              
-              <div
-                className={`max-w-[70%] p-2 rounded-lg text-sm ${
-                  msg.isUser
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700 text-slate-200'
-                }`}
-              >
-                {msg.message}
-              </div>
-              
-              {msg.isUser && (
-                <div className="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0 mt-1">
-                  <User className="w-3 h-3 text-white" />
+                <div className="bg-slate-700 text-slate-200 p-2 rounded-lg text-sm">
+                  Thinking...
                 </div>
-              )}
-            </div>
-          ))}
-          
-          {loading && (
-            <div className="flex gap-2 justify-start">
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
-                <Bot className="w-3 h-3 text-white" />
               </div>
-              <div className="bg-slate-700 text-slate-200 p-2 rounded-lg text-sm">
-                Thinking...
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
         
         <div className="flex gap-2">
           <Input
