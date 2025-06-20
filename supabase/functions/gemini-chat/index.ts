@@ -13,12 +13,21 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, dashboardContext } = await req.json();
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
     if (!geminiApiKey) {
       throw new Error('GEMINI_API_KEY not configured');
     }
+
+    // Create enhanced prompt with dashboard context
+    const systemPrompt = `You are an energy efficiency expert assistant for a NILM (Non-Intrusive Load Monitoring) dashboard. 
+    Help users understand their energy consumption, provide tips for reducing energy costs, and explain appliance efficiency. 
+    Keep responses concise and practical. 
+
+    ${dashboardContext ? `Current Dashboard Data: ${dashboardContext}` : ''}
+    
+    Use the dashboard data to provide specific recommendations and insights about the user's current energy usage.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
@@ -30,9 +39,7 @@ serve(async (req) => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are an energy efficiency expert assistant for a NILM (Non-Intrusive Load Monitoring) dashboard. 
-              Help users understand their energy consumption, provide tips for reducing energy costs, and explain appliance efficiency. 
-              Keep responses concise and practical. User message: ${message}`
+              text: `${systemPrompt}\n\nUser message: ${message}`
             }]
           }],
           generationConfig: {

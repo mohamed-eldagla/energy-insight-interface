@@ -17,7 +17,31 @@ interface ChatMessage {
   isUser: boolean;
 }
 
-const Chatbot = () => {
+interface ApplianceData {
+  id: string;
+  house_id: number;
+  appliance_name: string;
+  current_power_kw: number;
+  total_energy_kwh_day: number;
+  peak_energy_kwh: number;
+  longest_on_duration_hrs: number;
+  efficiency_percentage: number;
+  potential_savings_year: number;
+  status: string;
+  timestamp: string;
+}
+
+interface ChatbotProps {
+  applianceData?: ApplianceData[];
+  selectedHouse?: string;
+  selectedAppliance?: string;
+}
+
+const Chatbot: React.FC<ChatbotProps> = ({ 
+  applianceData = [], 
+  selectedHouse = '1', 
+  selectedAppliance = 'all' 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -25,6 +49,7 @@ const Chatbot = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,11 +59,19 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Clear chat history when user changes
   useEffect(() => {
-    if (isOpen && user) {
+    if (user?.id !== currentUserId) {
+      setMessages([]);
+      setCurrentUserId(user?.id || null);
+    }
+  }, [user?.id, currentUserId]);
+
+  useEffect(() => {
+    if (isOpen && user && user.id === currentUserId) {
       loadChatHistory();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, currentUserId]);
 
   const loadChatHistory = async () => {
     try {
@@ -75,6 +108,29 @@ const Chatbot = () => {
     }
   };
 
+  const generateDashboardContext = () => {
+    if (!applianceData.length) return '';
+    
+    const totalPower = applianceData.reduce((sum, item) => sum + (item.current_power_kw || 0), 0);
+    const avgEfficiency = applianceData.reduce((sum, item) => sum + (item.efficiency_percentage || 0), 0) / applianceData.length;
+    const activeDevices = applianceData.filter(item => item.status === 'active').length;
+    const totalSavings = applianceData.reduce((sum, item) => sum + (item.potential_savings_year || 0), 0);
+
+    return `Current dashboard context for House ${selectedHouse}:
+- Total Power Consumption: ${totalPower.toFixed(2)} kW
+- Average Efficiency: ${avgEfficiency.toFixed(0)}%
+- Active Devices: ${activeDevices}
+- Total Potential Annual Savings: $${totalSavings}
+- Appliances data: ${JSON.stringify(applianceData.map(item => ({
+  name: item.appliance_name,
+  power: item.current_power_kw,
+  efficiency: item.efficiency_percentage,
+  status: item.status,
+  dailyEnergy: item.total_energy_kwh_day,
+  potentialSavings: item.potential_savings_year
+})))}`;
+  };
+
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading || !user) return;
 
@@ -92,9 +148,14 @@ const Chatbot = () => {
     }]);
 
     try {
-      // Call the Gemini chat function
+      const dashboardContext = generateDashboardContext();
+      
+      // Call the Gemini chat function with dashboard context
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
-        body: { message: userMessage }
+        body: { 
+          message: userMessage,
+          dashboardContext: dashboardContext
+        }
       });
 
       if (error) throw error;
@@ -168,7 +229,7 @@ const Chatbot = () => {
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col p-3">
-        <ScrollArea className="flex-1 mb-3">
+        <ScrollArea className="flex-1 mb-3 h-[280px]">
           <div className="space-y-3 pr-4">
             {messages.length === 0 && (
               <div className="text-slate-400 text-sm text-center py-4">

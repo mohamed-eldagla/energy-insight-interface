@@ -348,8 +348,12 @@ const Dashboard = () => {
         )}
       </div>
       
-      {/* Chatbot */}
-      <Chatbot />
+      {/* Chatbot with dashboard data */}
+      <Chatbot 
+        applianceData={applianceData}
+        selectedHouse={selectedHouse}
+        selectedAppliance={selectedAppliance}
+      />
     </div>
   );
 };
