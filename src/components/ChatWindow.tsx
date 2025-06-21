@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { Bot, User, X, Send } from 'lucide-react';
 import { ChatMessage } from '@/types/chat';
 
@@ -17,6 +18,8 @@ interface ChatWindowProps {
   onSendMessage: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
   onLoadHistory: () => void;
+  temperature: number;
+  setTemperature: (value: number) => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -28,14 +31,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onClose,
   onSendMessage,
   onKeyPress,
-  onLoadHistory
+  onLoadHistory,
+  temperature,
+  setTemperature
 }) => {
   useEffect(() => {
     onLoadHistory();
   }, [onLoadHistory]);
 
   return (
-    <Card className="fixed bottom-4 right-4 w-80 h-96 bg-slate-800 border-slate-700 shadow-xl z-50 flex flex-col">
+    <Card className="fixed bottom-4 right-4 w-96 h-[600px] bg-slate-800 border-slate-700 shadow-xl z-50 flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg text-white flex items-center gap-2">
           <Bot className="w-5 h-5 text-blue-400" />
@@ -52,7 +57,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col p-3">
-        <ScrollArea className="flex-1 mb-3 h-[280px]">
+        <ScrollArea className="flex-1 mb-3 h-[420px]">
           <div className="space-y-3 pr-4">
             {messages.length === 0 && (
               <div className="text-slate-400 text-sm text-center py-4">
@@ -103,6 +108,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
+        
+        {/* Temperature Slider */}
+        <div className="mb-3 p-2 bg-slate-700 rounded-lg">
+          <label className="text-slate-300 text-xs mb-2 block">
+            Response Temperature: {temperature.toFixed(1)}
+          </label>
+          <Slider
+            value={[temperature]}
+            onValueChange={(value) => setTemperature(value[0])}
+            max={1}
+            min={0}
+            step={0.1}
+            className="w-full"
+          />
+        </div>
         
         <div className="flex gap-2">
           <Input

@@ -8,7 +8,8 @@ import { generateDashboardContext } from '@/utils/chatUtils';
 
 export const useChatbot = (
   applianceData: ApplianceData[] = [], 
-  selectedHouse: string = '1'
+  selectedHouse: string = '1',
+  temperature: number = 0.7
 ) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -90,11 +91,12 @@ export const useChatbot = (
     try {
       const dashboardContext = generateDashboardContext(applianceData, selectedHouse);
       
-      // Call the Gemini chat function with dashboard context
+      // Call the Gemini chat function with dashboard context and temperature
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: { 
           message: userMessage,
-          dashboardContext: dashboardContext
+          dashboardContext: dashboardContext,
+          temperature: temperature
         }
       });
 

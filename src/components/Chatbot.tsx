@@ -11,6 +11,7 @@ const Chatbot: React.FC<ChatbotProps> = ({
   selectedAppliance = 'all' 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [temperature, setTemperature] = useState(0.7);
   
   const {
     messages,
@@ -21,7 +22,7 @@ const Chatbot: React.FC<ChatbotProps> = ({
     loadChatHistory,
     sendMessage,
     handleKeyPress
-  } = useChatbot(applianceData, selectedHouse);
+  } = useChatbot(applianceData, selectedHouse, temperature);
 
   if (!isOpen) {
     return <ChatbotButton onClick={() => setIsOpen(true)} />;
@@ -38,6 +39,8 @@ const Chatbot: React.FC<ChatbotProps> = ({
       onSendMessage={sendMessage}
       onKeyPress={handleKeyPress}
       onLoadHistory={loadChatHistory}
+      temperature={temperature}
+      setTemperature={setTemperature}
     />
   );
 };
