@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appliance_metrics: {
+        Row: {
+          appliance_name: string
+          current_power_kw: number | null
+          id: string
+          status: string | null
+          timestamp: string
+          total_energy_kwh_day: number | null
+          user_id: string
+        }
+        Insert: {
+          appliance_name: string
+          current_power_kw?: number | null
+          id?: string
+          status?: string | null
+          timestamp?: string
+          total_energy_kwh_day?: number | null
+          user_id: string
+        }
+        Update: {
+          appliance_name?: string
+          current_power_kw?: number | null
+          id?: string
+          status?: string | null
+          timestamp?: string
+          total_energy_kwh_day?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          response: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          response: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          response?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
